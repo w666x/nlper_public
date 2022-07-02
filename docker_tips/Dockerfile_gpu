@@ -1,0 +1,21 @@
+FROM ufoym/deepo:pytorch-py36-cu111
+
+WORKDIR /home/project
+RUN mkdir -p /usr/share/zoneinfo/Asia &&\  
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y libsasl2-dev libsasl2-modules-gssapi-heimdal && rm -rf /var/lib/apt/lists/*
+
+COPY ./pkgs_v1/ ./pkgs
+COPY requirements_gpu.txt . 
+
+RUN pip uninstall enum34 -y &&\
+pip install --upgrade pip -i https://pypi.mirrors.ustc.edu.cn/simple  &&\
+pip install --no-index --find-links=/home/project/pkgs -r requirements_gpu.txt  &&\
+rm -rf /var/cache/apk/* &&\
+rm -rf /home/project/pkgs
+
+expose 8886
+CMD ["python3"]
+

@@ -1,0 +1,24 @@
+FROM ubuntu:18.04
+WORKDIR /home/basic_docker
+
+RUN apt-get update && \
+apt-get install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget curl llvm libbz2-dev gcc -y
+
+COPY Python-3.7.11.tgz .
+
+RUN tar -xf Python-3.7.11.tgz && \
+cd Python-3.7.11 && \
+./configure --prefix=/usr/local/python3 --enable-optimizations --enable-shared --with-ssl && \
+make && make install
+
+RUN echo "/usr/local/python3/lib" > /etc/ld.so.conf.d/python3.conf && ldconfig && \
+ln -s /usr/local/python3/bin/python3.7 /usr/bin/python  && \
+ln -s /usr/local/python3/bin/pip3.7 /usr/bin/pip
+
+
+RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+RUN rm -rf /var/cache/apk/* && \
+pip install --default-timeout=100 --upgrade pip -i http://pypi.douban.com/simple --trusted-host pypi.douban.com && \
+pip install --default-timeout=100 --upgrade setuptools -i http://pypi.douban.com/simple --trusted-host pypi.douban.com
+
+CMD ["python"]
